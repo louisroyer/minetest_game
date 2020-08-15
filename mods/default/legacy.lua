@@ -44,6 +44,11 @@ end
 -- Chests
 default.register_chest = default.chest.register_chest
 
+default.chest.get_chest_formspec = chests.get_chest_formspec
+default.chest.chest_lid_obstructed = chests.chest_lid_obstrued
+default.chest.chest_lid_close = chests.chest_lid_close
+default.chest.register_chest = chests.register_chest
+
 -- Check for a volume intersecting protection
 function default.intersects_protection(minp, maxp, player_name, interval)
 	minetest.log("warning", "default.intersects_protection() is " ..

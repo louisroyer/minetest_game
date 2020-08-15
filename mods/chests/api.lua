@@ -1,9 +1,9 @@
-default.chest = {}
+-- Translation support
+local S = minetest.get_translator("chests")
 
--- support for MT game translation.
-local S = default.get_translator
+chests = {}
 
-function default.chest.get_chest_formspec(pos)
+function chests.get_chest_formspec(pos)
 	local spos = pos.x .. "," .. pos.y .. "," .. pos.z
 	local formspec =
 		"size[8,9]" ..
@@ -12,11 +12,11 @@ function default.chest.get_chest_formspec(pos)
 		"list[current_player;main;0,6.08;8,3;8]" ..
 		"listring[nodemeta:" .. spos .. ";main]" ..
 		"listring[current_player;main]" ..
-		default.get_hotbar_bg(0,4.85)
+		mtg_gui.get_hotbar_bg(0,4.85)
 	return formspec
 end
 
-function default.chest.chest_lid_obstructed(pos)
+function chests.chest_lid_obstructed(pos)
 	local above = {x = pos.x, y = pos.y + 1, z = pos.z}
 	local def = minetest.registered_nodes[minetest.get_node(above).name]
 	-- allow ladders, signs, wallmounted things and torches to not obstruct
@@ -30,14 +30,14 @@ function default.chest.chest_lid_obstructed(pos)
 	return true
 end
 
-function default.chest.chest_lid_close(pn)
-	local chest_open_info = default.chest.open_chests[pn]
+function chests.chest_lid_close(pn)
+	local chest_open_info = chests.open_chests[pn]
 	local pos = chest_open_info.pos
 	local sound = chest_open_info.sound
 	local swap = chest_open_info.swap
 
-	default.chest.open_chests[pn] = nil
-	for k, v in pairs(default.chest.open_chests) do
+	chests.open_chests[pn] = nil
+	for k, v in pairs(chests.open_chests) do
 		if v.pos.x == pos.x and v.pos.y == pos.y and v.pos.z == pos.z then
 			return true
 		end
@@ -50,33 +50,9 @@ function default.chest.chest_lid_close(pn)
 		max_hear_distance = 10}, true)
 end
 
-default.chest.open_chests = {}
+chests.open_chests = {}
 
-minetest.register_on_player_receive_fields(function(player, formname, fields)
-	if formname ~= "default:chest" then
-		return
-	end
-	if not player or not fields.quit then
-		return
-	end
-	local pn = player:get_player_name()
-
-	if not default.chest.open_chests[pn] then
-		return
-	end
-
-	default.chest.chest_lid_close(pn)
-	return true
-end)
-
-minetest.register_on_leaveplayer(function(player)
-	local pn = player:get_player_name()
-	if default.chest.open_chests[pn] then
-		default.chest.chest_lid_close(pn)
-	end
-end)
-
-function default.chest.register_chest(prefixed_name, d)
+function chests.register_chest(prefixed_name, d)
 	local name = prefixed_name:sub(1,1) == ':' and prefixed_name:sub(2,-1) or prefixed_name
 	local def = table.copy(d)
 	def.drawtype = "mesh"
@@ -131,15 +107,15 @@ function default.chest.register_chest(prefixed_name, d)
 
 			minetest.sound_play(def.sound_open, {gain = 0.3,
 					pos = pos, max_hear_distance = 10}, true)
-			if not default.chest.chest_lid_obstructed(pos) then
+			if not chests.chest_lid_obstructed(pos) then
 				minetest.swap_node(pos,
 						{ name = name .. "_open",
 						param2 = node.param2 })
 			end
 			minetest.after(0.2, minetest.show_formspec,
 					clicker:get_player_name(),
-					"default:chest", default.chest.get_chest_formspec(pos))
-			default.chest.open_chests[clicker:get_player_name()] = { pos = pos,
+					"chests:chest", chests.get_chest_formspec(pos))
+			chests.open_chests[clicker:get_player_name()] = { pos = pos,
 					sound = def.sound_close, swap = name }
 		end
 		def.on_blast = function() end
@@ -163,8 +139,8 @@ function default.chest.register_chest(prefixed_name, d)
 
 			minetest.show_formspec(
 				player:get_player_name(),
-				"default:chest_locked",
-				default.chest.get_chest_formspec(pos)
+				"chests:chest_locked",
+				chests.get_chest_formspec(pos)
 			)
 		end
 		def.on_skeleton_key_use = function(pos, player, newsecret)
@@ -202,15 +178,15 @@ function default.chest.register_chest(prefixed_name, d)
 		def.on_rightclick = function(pos, node, clicker)
 			minetest.sound_play(def.sound_open, {gain = 0.3, pos = pos,
 					max_hear_distance = 10}, true)
-			if not default.chest.chest_lid_obstructed(pos) then
+			if not chests.chest_lid_obstructed(pos) then
 				minetest.swap_node(pos, {
 						name = name .. "_open",
 						param2 = node.param2 })
 			end
 			minetest.after(0.2, minetest.show_formspec,
 					clicker:get_player_name(),
-					"default:chest", default.chest.get_chest_formspec(pos))
-			default.chest.open_chests[clicker:get_player_name()] = { pos = pos,
+					"chests:chest", chests.get_chest_formspec(pos))
+			chests.open_chests[clicker:get_player_name()] = { pos = pos,
 					sound = def.sound_close, swap = name }
 		end
 		def.on_blast = function(pos)
@@ -270,91 +246,22 @@ function default.chest.register_chest(prefixed_name, d)
 	minetest.register_node(prefixed_name .. "_open", def_opened)
 
 	-- convert old chests to this new variant
-	if name == "default:chest" or name == "default:chest_locked" then
+	if name == "chests:chest" or name == "chests:chest_locked" then
 		minetest.register_lbm({
 			label = "update chests to opening chests",
-			name = "default:upgrade_" .. name:sub(9,-1) .. "_v2",
+			name = "chests:upgrade_" .. name:sub(9,-1) .. "_v2",
 			nodenames = {name},
 			action = function(pos, node)
 				local meta = minetest.get_meta(pos)
 				meta:set_string("formspec", nil)
 				local inv = meta:get_inventory()
-				local list = inv:get_list("default:chest")
+				local list = inv:get_list("chests:chest")
 				if list then
 					inv:set_size("main", 8*4)
 					inv:set_list("main", list)
-					inv:set_list("default:chest", nil)
+					inv:set_list("chests:chest", nil)
 				end
 			end
 		})
 	end
 end
-
-default.chest.register_chest("default:chest", {
-	description = S("Chest"),
-	tiles = {
-		"default_chest_top.png",
-		"default_chest_top.png",
-		"default_chest_side.png",
-		"default_chest_side.png",
-		"default_chest_front.png",
-		"default_chest_inside.png"
-	},
-	sounds = default.node_sound_wood_defaults(),
-	sound_open = "default_chest_open",
-	sound_close = "default_chest_close",
-	groups = {choppy = 2, oddly_breakable_by_hand = 2},
-})
-
-default.chest.register_chest("default:chest_locked", {
-	description = S("Locked Chest"),
-	tiles = {
-		"default_chest_top.png",
-		"default_chest_top.png",
-		"default_chest_side.png",
-		"default_chest_side.png",
-		"default_chest_lock.png",
-		"default_chest_inside.png"
-	},
-	sounds = default.node_sound_wood_defaults(),
-	sound_open = "default_chest_open",
-	sound_close = "default_chest_close",
-	groups = {choppy = 2, oddly_breakable_by_hand = 2},
-	protected = true,
-})
-
-minetest.register_craft({
-	output = "default:chest",
-	recipe = {
-		{"group:wood", "group:wood", "group:wood"},
-		{"group:wood", "", "group:wood"},
-		{"group:wood", "group:wood", "group:wood"},
-	}
-})
-
-minetest.register_craft({
-	output = "default:chest_locked",
-	recipe = {
-		{"group:wood", "group:wood", "group:wood"},
-		{"group:wood", "default:steel_ingot", "group:wood"},
-		{"group:wood", "group:wood", "group:wood"},
-	}
-})
-
-minetest.register_craft( {
-	type = "shapeless",
-	output = "default:chest_locked",
-	recipe = {"default:chest", "default:steel_ingot"},
-})
-
-minetest.register_craft({
-	type = "fuel",
-	recipe = "default:chest",
-	burntime = 30,
-})
-
-minetest.register_craft({
-	type = "fuel",
-	recipe = "default:chest_locked",
-	burntime = 30,
-})

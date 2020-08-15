@@ -1,0 +1,2 @@
+chests.locked_chests (Enable locked chests) bool true
+chests.basic_materials (If installed, use padlock from basic_materials for locked chests craft) bool true

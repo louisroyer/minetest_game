@@ -1,0 +1,14 @@
+# textdomain: chests
+
+
+### api.lua ###
+
+Locked Chest (owned by @1)=Abgeschlossene Truhe (Eigentum von @1)
+You do not own this chest.=Ihnen gehört diese Truhe nicht.
+a locked chest=eine abgeschlossene Truhe
+
+### api.lua ###
+### chests.lua ###
+
+Chest=Truhe
+Locked Chest=Abgeschlossene Truhe
