@@ -22,10 +22,13 @@ LAVA_VISC = minetest.registered_nodes["default:lava_source"].liquid_viscosity
 LIGHT_MAX = default.LIGHT_MAX
 
 -- Formspecs
-default.gui_suvival_form = default.gui_survival_form
+default.gui_suvival_form = mtg_gui.survival_form
 default.gui_bg     = ""
 default.gui_bg_img = ""
 default.gui_slots  = ""
+
+default.get_hotbar_bg = mtg_gui.get_hotbar_bg
+default.gui_survival_form = mtg_gui.survival_form
 
 -- Players
 if minetest.get_modpath("player_api") then

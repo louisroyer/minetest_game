@@ -672,7 +672,7 @@ Use sfinv.make_formspec to apply a layout:
 	return sfinv.make_formspec(player, context, [[
 		list[current_player;craft;1.75,0.5;3,3;]
 		list[current_player;craftpreview;5.75,1.5;1,1;]
-		image[4.75,1.5;1,1;gui_furnace_arrow_bg.png^[transformR270]
+		image[4.75,1.5;1,1;gui_arrow_bg.png^[transformR270]
 		listring[current_player;main]
 		listring[current_player;craft]
 		image[0,4.25;1,1;gui_hb_bg.png]
@@ -839,7 +839,7 @@ Default constants
 GUI and formspecs
 -----------------
 
-`default.get_hotbar_bg(x, y)`
+`mtg_gui.get_hotbar_bg(x, y)`
 
  * Get the hotbar background as string, containing the formspec elements
  * x: Horizontal position in the formspec
@@ -857,7 +857,7 @@ GUI and formspecs
 
  * Deprecated, remove from mods.
 
-`default.gui_survival_form`
+`mtg_gui.survival_form`
 
  * Entire formspec for the survival inventory
 
